@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intercesión ICF CDMX - Peticiones de Oración</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 24px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    header h1 {
+      color: #0369a1;
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .petition-count {
+      color: #0369a1;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .search-box {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: #0369a1;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      background: white;
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .tab {
+      padding: 8px 16px;
+      background: none;
+      border: 2px solid #e0e0e0;
+      color: #666;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+
+    .tab.active {
+      background: #0369a1;
+      color: white;
+      border-color: #0369a1;
+    }
+
+    .tab:hover {
+      border-color: #0369a1;
+    }
+
+    .petitions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .petition-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      position: relative;
+      transition: all 0.3s;
+    }
+
+    .petition-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .petition-card.recent::before {
+      content: '🟢';
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 12px;
+    }
+
+    .petition-card h3 {
+      color: #0369a1;
+      font-size: 18px;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .petition-card p {
+      color: #666;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .petition-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #999;
+      padding-top: 12px;
+      border-top: 1px solid #f0f0f0;
+      margin-bottom: 12px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .status-active {
+      background: #dbeafe;
+      color: #0369a1;
+    }
+
+    .status-completed {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .status-archived {
+      background: #f3f4f6;
+      color: #666;
+    }
+
+    .updates-count {
+      background: #fef3c7;
+      color: #92400e;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+    }
+
+    .petition-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 500;
+    }
+
+    .btn-edit {
+      background: #0369a1;
+      color: white;
+    }
+
+    .btn-edit:hover {
+      background: #0284c7;
+    }
+
+    .btn-update {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-update:hover {
+      background: #059669;
+    }
+
+    .btn-delete {
+      background: #ff6b6b;
+      color: white;
+    }
+
+    .btn-delete:hover {
+      background: #ff5252;
+    }
+
+    .btn-share {
+      background: #8b5cf6;
+      color: white;
+    }
+
+    .btn-share:hover {
+      background: #7c3aed;
+    }
+
+    .btn-copy {
+      background: #06b6d4;
+      color: white;
+    }
+
+    .btn-copy:hover {
+      background: #0891b2;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      max-width: 95vw;
+      width: 95%;
+      max-height: 95vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .modal-content h2 {
+      color: #0369a1;
+      margin-bottom: 16px;
+      font-size: 18px;
+    }
+
+    .modal-content textarea,
+    .modal-content input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .modal-content textarea:focus,
+    .modal-content input:focus {
+      outline: none;
+      border-color: #0a7ea4;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .modal-buttons button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .modal-buttons .btn-primary {
+      background: #0369a1;
+      color: white;
+    }
+
+    .modal-buttons .btn-secondary {
+      background: #e0e0e0;
+      color: #666;
+    }
+
+    .no-petitions {
+      text-align: center;
+      padding: 60px 20px;
+      background: white;
+      border-radius: 12px;
+      color: #999;
+    }
+
+    .error-message {
+      background: rgba(255, 255, 255, 0.95);
+      color: #d32f2f;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+      color: white;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    footer {
+      text-align: center;
+      padding: 16px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 12px;
+    }
+
+    .list-item {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .list-item:hover {
+      background: #f9f9f9;
+    }
+
+    .list-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .list-item label {
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .lists-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 16px;
+    }
+
+    .list-card {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .list-card h4 {
+      color: #0369a1;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .list-card .list-item {
+      background: #f9f9f9;
+      padding: 8px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .list-card .list-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+    }
+
+    .list-card .list-item label {
+      font-size: 12px;
+      flex: 1;
+    }
+
+    .list-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .list-actions button {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .create-list-btn {
+      background: #0369a1;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+      margin-bottom: 16px;
+      width: 100%;
+    }
+
+    .create-list-btn:hover {
+      background: #0284c7;
+    }
+
+    .lists-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .lists-header h3 {
+      color: #0369a1;
+      font-size: 16px;
+    }
+
+    .selected-count {
+      background: #0369a1;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🙏 Intercesión ICF CDMX</h1>
+      <p>Peticiones de oración - Página pública</p>
+      <div class="petition-count" id="petitionCount">0 peticiones</div>
+    </header>
+
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Buscar peticiones por nombre o descripción...">
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-filter="all">Todas</button>
+      <button class="tab" data-filter="active">Activas</button>
+      <button class="tab" data-filter="completed">Completadas</button>
+      <button class="tab" data-filter="archived">Archivadas</button>
+      <button class="tab" data-filter="lists">Listas</button>
+    </div>
+
+    <div id="newPetitionButtonContainer" style="margin-bottom: 16px;">
+      <button class="create-list-btn" onclick="openNewPetitionModal()" id="newPetitionBtn" style="display: none;">+ Nueva Petición</button>
+    </div>
+
+    <div id="app">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Cargando peticiones...</p>
+      </div>
+    </div>
+
+    <footer>
+      <p>© 2026 Intercesión ICF CDMX - Página pública sin autenticación requerida</p>
+    </footer>
+  </div>
+
+  <!-- Modal para editar -->
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <h2>Editar Petición</h2>
+      <input type="text" id="editName" placeholder="Nombre de la petición">
+      <textarea id="editDescription" placeholder="Descripción" rows="4"></textarea>
+      <div class="modal-buttons">
+        <button class="btn-primary" onclick="saveEdit()">Guardar</button>
+        <button class="btn-secondary" onclick="closeModal('editModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para agregar actualización -->
+  <div class="modal" id="updateModal">
+    <div class="modal-content">
+      <h2>Agregar Actualización</h2>
+      <textarea id="updateText" placeholder="Escribe la actualización..." rows="4"></textarea>
+      <div class="modal-buttons">
+        <button class="btn-primary" onclick="saveUpdate()">Guardar</button>
+        <button class="btn-secondary" onclick="closeModal('updateModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para confirmar eliminación -->
+  <div class="modal" id="deleteModal">
+    <div class="modal-content">
+      <h2>Confirmar Eliminación</h2>
+      <p>¿Estás seguro de que deseas eliminar esta petición?</p>
+      <div class="modal-buttons">
+        <button class="btn-primary" onclick="confirmDelete()">Eliminar</button>
+        <button class="btn-secondary" onclick="closeModal('deleteModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para ver detalle de petición -->
+  <div class="modal" id="detailModal">
+    <div class="modal-content">
+      <h2 id="detailTitle"></h2>
+      <div id="detailContent"></div>
+      <div id="detailHistory"></div>
+      <div class="modal-buttons">
+        <button class="btn-primary" onclick="openEditModalFromDetail()">Editar</button>
+        <button class="btn-update" onclick="openUpdateModalFromDetail()">+ Actualizar</button>
+        <button class="btn-delete" onclick="openDeleteModalFromDetail()">Eliminar</button>
+        <button class="btn-secondary" onclick="closeModal('detailModal')">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para crear nueva petición -->
+  <div class="modal" id="newPetitionModal">
+    <div class="modal-content">
+      <h2>Nueva Petición</h2>
+      <input type="text" id="newPetitionName" placeholder="Nombre de la petición">
+      <textarea id="newPetitionDescription" placeholder="Descripción" rows="4"></textarea>
+      <div class="modal-buttons">
+        <button class="btn-primary" onclick="saveNewPetition()">Crear</button>
+        <button class="btn-secondary" onclick="closeModal('newPetitionModal')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allPetitions = [];
+    let currentFilter = 'all';
+    let currentEditId = null;
+    let currentUpdateId = null;
+    let currentDeleteId = null;
+    let selectedForList = new Set();
+    let createdLists = [];
+
+    // Cargar listas del localStorage al iniciar
+    function loadListsFromStorage() {
+      const stored = localStorage.getItem('oracionLists');
+      if (stored) {
+        try {
+          createdLists = JSON.parse(stored);
+        } catch (e) {
+          console.error('Error al cargar listas:', e);
+          createdLists = [];
+        }
+      }
+    }
+
+    // Guardar listas en localStorage
+    function saveListsToStorage() {
+      localStorage.setItem('oracionLists', JSON.stringify(createdLists));
+    }
+
+    // Guardar peticiones en localStorage
+    function savePetitionsToStorage() {
+      localStorage.setItem('oracionPetitions', JSON.stringify(allPetitions));
+    }
+
+    // Cargar peticiones del localStorage
+    function loadPetitionsFromStorage() {
+      const stored = localStorage.getItem('oracionPetitions');
+      if (stored) {
+        try {
+          allPetitions = JSON.parse(stored);
+          renderPetitions(allPetitions);
+          return true;
+        } catch (e) {
+          console.error('Error al cargar peticiones del localStorage:', e);
+          return false;
+        }
+      }
+      return false;
+    }
+
+    async function loadPetitions() {
+      try {
+        // Primero intenta cargar del localStorage
+        const loadedFromStorage = loadPetitionsFromStorage();
+        if (loadedFromStorage) {
+          renderPetitions(allPetitions);
+          return;
+        }
+        
+        // Si no hay en localStorage, intenta cargar de la API
+        const response = await fetch('/api/trpc/petitions.list');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        allPetitions = data.result?.data?.json || [];
+        
+        // Guardar en localStorage para persistencia
+        savePetitionsToStorage();
+        renderPetitions(allPetitions);
+      } catch (error) {
+        console.error('Error:', error);
+        // Si todo falla, mostrar mensaje pero permitir crear nuevas peticiones
+        renderPetitions(allPetitions);
+      }
+    }
+
+    function renderPetitions(petitions) {
+      const totalCount = allPetitions.length;
+      document.getElementById('petitionCount').textContent = `${totalCount} petición${totalCount !== 1 ? 'es' : ''}`;
+
+      if (currentFilter === 'lists') {
+        renderListsView(petitions);
+        return;
+      }
+
+      if (petitions.length === 0) {
+        document.getElementById('app').innerHTML = `
+          <div class="no-petitions">
+            <h2>No hay peticiones</h2>
+            <p>No se encontraron peticiones para este filtro.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const html = '<div class="petitions-grid">' + petitions.map(p => {
+        const isRecent = isRecentlyUpdated(p);
+        const lastUpdate = getLastUpdate(p);
+        return `
+          <div class="petition-card ${isRecent ? 'recent' : ''}" onclick="openDetailModal('${p.id}')" style="cursor: pointer;">
+            <h3>${escapeHtml(p.name)}</h3>
+            <p>${escapeHtml(lastUpdate || p.description)}</p>
+            <div class="petition-meta">
+              <span class="status-badge status-${p.status}">${getStatusLabel(p.status)}</span>
+              <span class="updates-count">${(p.history?.length || 0)} act.</span>
+            </div>
+            <div class="petition-actions">
+              <button class="btn btn-edit" onclick="event.stopPropagation(); openEditModal('${p.id}')">Editar</button>
+              <button class="btn btn-update" onclick="event.stopPropagation(); openUpdateModal('${p.id}')">+ Actualizar</button>
+              <button class="btn btn-delete" onclick="event.stopPropagation(); openDeleteModal('${p.id}')">Eliminar</button>
+            </div>
+          </div>
+        `;
+      }).join('') + '</div>';
+
+      document.getElementById('app').innerHTML = html;
+    }
+
+    function renderListsView(petitions) {
+      let html = `
+        <div class="lists-header">
+          <h3>Mis Listas de Oración</h3>
+        </div>
+      `;
+      
+      html += `<button class="create-list-btn" onclick="openCreateListModal()">+ Crear Nueva Lista</button>`;
+      
+      // Mostrar listas creadas
+      if (createdLists.length > 0) {
+        html += '<div style="margin-top: 24px;">';
+        html += createdLists.map((list, idx) => `
+          <div style="background: white; padding: 16px; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <strong style="color: #0369a1; font-size: 16px;">${escapeHtml(list.name)}</strong>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn" onclick="editList(${idx})" style="padding: 6px 12px; font-size: 12px; background: #f59e0b; color: white; border: none; border-radius: 4px; cursor: pointer;">✏️ Editar</button>
+                <button class="btn btn-delete" onclick="deleteList(${idx})" style="padding: 6px 12px; font-size: 12px;">Eliminar</button>
+              </div>
+            </div>
+            <div style="background: #f5f5f5; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+              ${list.petitions.length > 0 ? `
+                <div style="font-size: 12px; color: #666; margin-bottom: 8px;"><strong>${list.petitions.length} peticiones:</strong></div>
+                ${list.petitions.map(p => `
+                  <div style="padding: 6px 0; border-bottom: 1px solid #e0e0e0; font-size: 13px; color: #333;">
+                    • ${escapeHtml(p.name)}
+                  </div>
+                `).join('')}
+              ` : `<div style="font-size: 12px; color: #999;">Sin peticiones</div>`}
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn" onclick="copyListToClipboard(${idx})" style="flex: 1; padding: 8px; background: #06b6d4; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer;">📋 Copiar</button>
+              <button class="btn" onclick="shareList(${idx})" style="flex: 1; padding: 8px; background: #0369a1; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer;">🔗 Compartir</button>
+              <button class="btn" onclick="downloadListAsPDF(${idx})" style="flex: 1; padding: 8px; background: #e74c3c; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer;">📄 PDF</button>
+            </div>
+          </div>
+        `).join('');
+        html += '</div>';
+      } else {
+        html += '<div style="background: white; padding: 24px; border-radius: 8px; text-align: center; color: #999;"><p>No tienes listas creadas. ¡Crea una nueva!</p></div>';
+      }
+
+      document.getElementById('app').innerHTML = html;
+    }
+
+    let currentListBeingEdited = null;
+
+    function openCreateListModal() {
+      const listName = prompt('Nombre de la nueva lista:');
+      if (!listName) return;
+
+      currentListBeingEdited = {
+        name: listName,
+        petitions: []
+      };
+
+      renderListSelectionView();
+    }
+
+    function renderListSelectionView() {
+      if (!currentListBeingEdited) return;
+
+      let html = `
+        <div class="lists-header">
+          <h3>Agregando peticiones a: <strong>${escapeHtml(currentListBeingEdited.name)}</strong></h3>
+        </div>
+      `;
+
+      html += '<div style="background: white; padding: 16px; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">';
+      html += '<div style="font-size: 12px; color: #666; margin-bottom: 12px;"><strong>Peticiones en la lista (' + currentListBeingEdited.petitions.length + '):</strong></div>';
+      
+      if (currentListBeingEdited.petitions.length > 0) {
+        html += '<div style="background: #f5f5f5; padding: 12px; border-radius: 6px; margin-bottom: 12px;">';
+        html += currentListBeingEdited.petitions.map((p, idx) => `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e0e0e0;">
+            <span style="font-size: 13px; color: #333;">• ${escapeHtml(p.name)}</span>
+            <button onclick="removeFromCurrentList(${idx})" style="padding: 4px 8px; background: #ff6b6b; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer;">✕</button>
+          </div>
+        `).join('');
+        html += '</div>';
+      } else {
+        html += '<div style="background: #f5f5f5; padding: 12px; border-radius: 6px; margin-bottom: 12px; color: #999; font-size: 12px;">Sin peticiones aún</div>';
+      }
+
+      html += '</div>';
+
+      html += '<div style="background: white; padding: 16px; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">';
+      html += '<div style="font-size: 12px; color: #666; margin-bottom: 12px;"><strong>Selecciona peticiones para agregar:</strong></div>';
+      html += '<div class="lists-container">' + allPetitions.map(p => {
+        const isInList = currentListBeingEdited.petitions.some(item => item.id === p.id);
+        return `
+          <div class="list-card" onclick="addToCurrentList('${p.id}')" style="cursor: pointer; border: 3px solid ${isInList ? '#22c55e' : '#e0e0e0'}; background: ${isInList ? '#f0fdf4' : 'white'};">
+            <h4>${escapeHtml(p.name)}</h4>
+            <div class="list-item">
+              <label>${escapeHtml(p.name)}</label>
+            </div>
+          </div>
+        `;
+      }).join('') + '</div>';
+
+      html += '<div style="display: flex; gap: 8px; margin-top: 16px;">';
+      html += '<button class="btn" onclick="saveCurrentList()" style="flex: 1; padding: 12px; background: #22c55e; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 500;">✓ Guardar Lista</button>';
+      html += '<button class="btn" onclick="cancelListEdit()" style="flex: 1; padding: 12px; background: #999; color: white; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 500;">✕ Cancelar</button>';
+      html += '</div>';
+
+      document.getElementById('app').innerHTML = html;
+    }
+
+    function addToCurrentList(petitionId) {
+      const petition = allPetitions.find(p => p.id === petitionId);
+      if (!petition) return;
+
+      const alreadyInList = currentListBeingEdited.petitions.some(p => p.id === petitionId);
+      if (alreadyInList) {
+        currentListBeingEdited.petitions = currentListBeingEdited.petitions.filter(p => p.id !== petitionId);
+      } else {
+        currentListBeingEdited.petitions.push(petition);
+      }
+
+      renderListSelectionView();
+    }
+
+    function removeFromCurrentList(idx) {
+      currentListBeingEdited.petitions.splice(idx, 1);
+      renderListSelectionView();
+    }
+
+    function saveCurrentList() {
+      if (currentListBeingEdited.petitions.length === 0) {
+        alert('Por favor agrega al menos una petición a la lista');
+        return;
+      }
+
+      if (currentListBeingEdited.editingIndex !== undefined) {
+        // Actualizar lista existente
+        createdLists[currentListBeingEdited.editingIndex].name = currentListBeingEdited.name;
+        createdLists[currentListBeingEdited.editingIndex].petitions = currentListBeingEdited.petitions;
+      } else {
+        // Crear nueva lista
+        createdLists.push({
+          name: currentListBeingEdited.name,
+          petitions: currentListBeingEdited.petitions,
+          createdAt: new Date()
+        });
+      }
+
+      saveListsToStorage();
+      currentListBeingEdited = null;
+      renderListsView(allPetitions);
+    }
+
+    function cancelListEdit() {
+      currentListBeingEdited = null;
+      renderListsView(allPetitions);
+    }
+
+    function deleteList(idx) {
+      if (confirm('¿Eliminar esta lista?')) {
+        createdLists.splice(idx, 1);
+        saveListsToStorage();
+        renderListsView(allPetitions);
+      }
+    }
+
+    function editList(idx) {
+      const list = createdLists[idx];
+      const newName = prompt('Nuevo nombre de la lista:', list.name);
+      if (!newName) return;
+
+      currentListBeingEdited = {
+        name: newName,
+        petitions: JSON.parse(JSON.stringify(list.petitions)),
+        editingIndex: idx
+      };
+
+      renderListSelectionView();
+    }
+
+    function formatListForSharing(list) {
+      const today = new Date();
+      const formattedDate = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+      
+      let text = '🙏 DIA 1\n';
+      text += 'Lista de Intercesión\n';
+      text += '==================================================\n\n';
+      
+      list.petitions.forEach((p, idx) => {
+        text += `${idx + 1}. ${p.name}\n`;
+        text += `   ${p.description}\n`;
+        text += `   📅 ${formattedDate}\n\n`;
+      });
+      
+      text += '==================================================\n';
+      text += `Generado: ${formattedDate}\n`;
+      text += 'Que Dios te bendiga en tu intercesión 🙏';
+      
+      return text;
+    }
+
+    function copyListToClipboard(idx) {
+      const list = createdLists[idx];
+      const text = formatListForSharing(list);
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Lista copiada al portapapeles');
+      }).catch(() => {
+        alert('No se pudo copiar la lista');
+      });
+    }
+
+    function shareList(idx) {
+      const list = createdLists[idx];
+      const text = formatListForSharing(list);
+      
+      const shareData = {
+        title: list.name,
+        text: text
+      };
+
+      if (navigator.share) {
+        navigator.share(shareData).catch(err => console.log('Error compartiendo:', err));
+      } else {
+        navigator.clipboard.writeText(text).then(() => {
+          alert('Lista copiada. Puedes compartirla manualmente.');
+        });
+      }
+    }
+
+    function downloadListAsPDF(idx) {
+      const list = createdLists[idx];
+      const text = formatListForSharing(list);
+      
+      // Crear un elemento de descarga
+      const element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+      element.setAttribute('download', `${list.name}.txt`);
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }
+
+    function isRecentlyUpdated(p) {
+      if (!p.history || p.history.length === 0) return false;
+      const lastUpdate = new Date(p.history[0].timestamp);
+      const now = new Date();
+      const hours = (now - lastUpdate) / (1000 * 60 * 60);
+      return hours < 24;
+    }
+
+    function getLastUpdate(p) {
+      if (!p.history || p.history.length === 0) return null;
+      return p.history[0].text || p.history[0].description;
+    }
+
+    function getStatusLabel(status) {
+      const labels = {
+        'active': 'Activa',
+        'completed': 'Completada',
+        'archived': 'Archivada'
+      };
+      return labels[status] || status;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function filterPetitions(searchTerm) {
+      let filtered = allPetitions;
+
+      if (currentFilter === 'active') {
+        filtered = filtered.filter(p => p.status === 'active');
+      } else if (currentFilter === 'completed') {
+        filtered = filtered.filter(p => p.status === 'completed');
+      } else if (currentFilter === 'archived') {
+        filtered = filtered.filter(p => p.status === 'archived');
+      }
+
+      if (searchTerm.trim()) {
+        const term = searchTerm.toLowerCase();
+        filtered = filtered.filter(p =>
+          p.name.toLowerCase().includes(term) ||
+          p.description.toLowerCase().includes(term)
+        );
+      }
+
+      renderPetitions(filtered);
+    }
+
+    function openEditModal(id) {
+      currentEditId = id;
+      const petition = allPetitions.find(p => p.id === id);
+      if (petition) {
+        document.getElementById('editName').value = petition.name;
+        document.getElementById('editDescription').value = petition.description;
+        document.getElementById('editModal').classList.add('active');
+      }
+    }
+
+    function saveEdit() {
+      const petition = allPetitions.find(p => p.id === currentEditId);
+      if (petition) {
+        petition.name = document.getElementById('editName').value;
+        petition.description = document.getElementById('editDescription').value;
+        petition.updatedAt = new Date();
+        renderPetitions(allPetitions);
+        closeModal('editModal');
+      }
+    }
+
+    function openUpdateModal(id) {
+      currentUpdateId = id;
+      document.getElementById('updateText').value = '';
+      document.getElementById('updateModal').classList.add('active');
+    }
+
+    function saveUpdate() {
+      const petition = allPetitions.find(p => p.id === currentUpdateId);
+      const text = document.getElementById('updateText').value.trim();
+      
+      if (petition && text) {
+        if (!petition.history) petition.history = [];
+        
+        // Si estamos editando una actualización existente
+        if (currentEditHistoryId !== null && currentEditHistoryIndex !== null) {
+          petition.history[currentEditHistoryIndex].text = text;
+          currentEditHistoryId = null;
+          currentEditHistoryIndex = null;
+        } else {
+          // Si es una nueva actualización
+          petition.history.unshift({
+            id: `${Date.now()}`,
+            timestamp: new Date().toISOString(),
+            text: text,
+            type: 'updated'
+          });
+        }
+        
+        petition.updatedAt = new Date();
+        // GUARDAR EN LOCALSTORAGE
+        savePetitionsToStorage();
+        renderPetitions(allPetitions);
+        closeModal('updateModal');
+        // Reabre el modal de detalle para mostrar el historial actualizado
+        openDetailModal(currentUpdateId);
+      }
+    }
+
+    function openDeleteModal(id) {
+      currentDeleteId = id;
+      document.getElementById('deleteModal').classList.add('active');
+    }
+
+    function confirmDelete() {
+      const index = allPetitions.findIndex(p => p.id === currentDeleteId);
+      if (index > -1) {
+        allPetitions.splice(index, 1);
+        savePetitionsToStorage();
+        renderPetitions(allPetitions);
+        closeModal('deleteModal');
+      }
+    }
+
+    let currentEditHistoryId = null;
+    let currentEditHistoryIndex = null;
+
+    function editHistoryUpdate(petitionId, historyIndex) {
+      currentEditHistoryId = petitionId;
+      currentEditHistoryIndex = historyIndex;
+      const petition = allPetitions.find(p => p.id === petitionId);
+      if (petition && petition.history && petition.history[historyIndex]) {
+        const updateText = petition.history[historyIndex].text || petition.history[historyIndex].description;
+        document.getElementById('updateText').value = updateText;
+        closeModal('detailModal');
+        document.getElementById('updateModal').classList.add('active');
+      }
+    }
+
+    function deleteHistoryUpdate(petitionId, historyIndex) {
+      const petition = allPetitions.find(p => p.id === petitionId);
+      if (petition && petition.history && petition.history[historyIndex]) {
+        if (confirm('Estás seguro de que deseas eliminar esta actualización?')) {
+          petition.history.splice(historyIndex, 1);
+          petition.updatedAt = new Date();
+          // GUARDAR EN LOCALSTORAGE
+          savePetitionsToStorage();
+          renderPetitions(allPetitions);
+          openDetailModal(petitionId);
+        }
+      }
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    function openDetailModal(id) {
+      const petition = allPetitions.find(p => p.id === id);
+      if (!petition) return;
+
+      document.getElementById('detailTitle').textContent = petition.name;
+      
+      let detailHtml = `
+        <p><strong>Descripción:</strong> ${escapeHtml(petition.description)}</p>
+        <p><strong>Estado:</strong> <span class="status-badge status-${petition.status}">${getStatusLabel(petition.status)}</span></p>
+        <p><strong>Creado:</strong> ${new Date(petition.createdAt).toLocaleDateString('es-MX')}</p>
+        <p><strong>Actualizado:</strong> ${new Date(petition.updatedAt).toLocaleDateString('es-MX')}</p>
+      `;
+      document.getElementById('detailContent').innerHTML = detailHtml;
+
+      let historyHtml = '';
+      if (petition.history && petition.history.length > 0) {
+        historyHtml = '<h3 style="color: #0369a1; margin-top: 16px; margin-bottom: 12px;">Historial de Actualizaciones</h3>';
+        historyHtml += '<div style="background: #f9f9f9; border-radius: 8px; padding: 12px; word-wrap: break-word; overflow-wrap: break-word; white-space: normal;">';
+        petition.history.forEach((update, index) => {
+          const updateDate = new Date(update.timestamp).toLocaleDateString('es-MX');
+          historyHtml += `<div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e0e0e0; word-wrap: break-word; overflow-wrap: break-word; white-space: normal;">`;
+          historyHtml += `<p style="font-size: 12px; color: #999; margin-bottom: 4px; word-wrap: break-word; overflow-wrap: break-word; white-space: normal;">${updateDate}</p>`;
+          historyHtml += `<p style="color: #333; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; line-height: 1.6;">${escapeHtml(update.text || update.description)}</p>`;
+          historyHtml += `<div style="display: flex; gap: 8px; margin-top: 8px;">`;
+          historyHtml += `<button onclick="editHistoryUpdate('${id}', ${index})" style="flex: 1; padding: 6px 12px; background: #0369a1; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">✏️ Editar</button>`;
+          historyHtml += `<button onclick="deleteHistoryUpdate('${id}', ${index})" style="flex: 1; padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px;">🗑️ Eliminar</button>`;
+          historyHtml += `</div>`;
+          historyHtml += `</div>`;
+        });
+        historyHtml += '</div>';
+      }
+      document.getElementById('detailHistory').innerHTML = historyHtml;
+      
+      currentEditId = id;
+      currentUpdateId = id;
+      currentDeleteId = id;
+      document.getElementById('detailModal').classList.add('active');
+    }
+
+    function openEditModalFromDetail() {
+      closeModal('detailModal');
+      openEditModal(currentEditId);
+    }
+
+    function openUpdateModalFromDetail() {
+      closeModal('detailModal');
+      openUpdateModal(currentUpdateId);
+    }
+
+    function openDeleteModalFromDetail() {
+      closeModal('detailModal');
+      openDeleteModal(currentDeleteId);
+    }
+
+    function openNewPetitionModal() {
+      document.getElementById('newPetitionName').value = '';
+      document.getElementById('newPetitionDescription').value = '';
+      document.getElementById('newPetitionModal').classList.add('active');
+    }
+
+    function saveNewPetition() {
+      const name = document.getElementById('newPetitionName').value.trim();
+      const description = document.getElementById('newPetitionDescription').value.trim();
+      
+      if (!name || !description) {
+        alert('Por favor completa todos los campos');
+        return;
+      }
+
+      const newPetition = {
+        id: `petition_${Date.now()}`,
+        name: name,
+        description: description,
+        status: 'active',
+        history: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      allPetitions.unshift(newPetition);
+      savePetitionsToStorage();
+      renderPetitions(allPetitions);
+      closeModal('newPetitionModal');
+      alert('Petición creada exitosamente');
+    }
+
+    // Eventos de pestañas
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentFilter = tab.dataset.filter;
+        selectedForList.clear();
+        
+        // Mostrar/ocultar boton de crear peticion solo en pestana Todas
+        const newPetitionBtn = document.getElementById('newPetitionBtn');
+        if (currentFilter === 'all') {
+          newPetitionBtn.style.display = 'block';
+        } else {
+          newPetitionBtn.style.display = 'none';
+        }
+        
+        const searchTerm = document.getElementById('searchInput').value;
+        filterPetitions(searchTerm);
+      });
+    });
+    
+    // Mostrar boton en la carga inicial si estamos en la pestana Todas
+    const newPetitionBtn = document.getElementById('newPetitionBtn');
+    if (currentFilter === 'all') {
+      newPetitionBtn.style.display = 'block';
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      filterPetitions(e.target.value);
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadListsFromStorage();
+      // Primero intenta cargar del localStorage
+      if (!loadPetitionsFromStorage()) {
+        // Si no hay en localStorage, carga de la API
+        loadPetitions();
+      }
+    });
+    // No recargar cada 30 segundos para no perder cambios locales
+    // setInterval(loadPetitions, 30000);
+  </script>
+</body>
+</html>
