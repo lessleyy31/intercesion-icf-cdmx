@@ -106,8 +106,8 @@
     }
 
     .petitions-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      display: flex;
+      flex-direction: column;
       gap: 16px;
       margin-bottom: 40px;
     }
@@ -605,8 +605,7 @@
   </div>
 
   <script>
-    // Datos inyectados - Respaldo de seguridad
-    let allPetitions = [{"id":"lucas-1","name":"Lucas - recién nacido","description":"Se encuentra hospitalizado en estado delicado. Oramos por sanidad, específicamente por la restauración de sus niveles de plaquetas y la solución a los problemas de coagulación que afectan su hígado.","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"},{"id":"josias-1","name":"Josias - bebé de Ana e Isaac","description":"Continúa mejorando","status":"Activa","updates":[{"date":"2026-05-17","text":"Continúa mejorando"}],"createdAt":"2026-05-13","updatedAt":"2026-05-17"},{"id":"yolanda-1","name":"Yolanda Quiroz","description":"Está por terminar su tratamiento nuclear oramos que sea fortalecida y sana.","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"},{"id":"lesley-1","name":"Lesley Alvarez","description":"* Oramos por un milagro sobrenatural en la formación de su hueso maxilar superior frontal.","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"},{"id":"eithan-1","name":"Eithan Samuel recién nacido","description":"Fue intubado por síndrome de dificultad respiratoria neonatal. Oramos por su sanidad, la pronta recuperación de sus pulmones y para que su familia sea fortalecida en fe durante este proceso.","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"},{"id":"mattew-1","name":"Mattew de 11 años","description":"Oramos por un milagro de sanidad total que disuelva los tumores, protección específica para sus ojos para que el tratamiento no afecte su visión. Oramos por fortaleza física para que su cuerpo resista el proceso sin efectos secundarios.","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"},{"id":"rebeca-1","name":"Rebeca Morales","description":"* Oramos por sus pulmones, que toda inflamación ceda * Declaramos sanidad sobre la bronquitis * Oramos por restauración en sus articulaciones","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"},{"id":"nadia-1","name":"Nadia Victoria","description":"*se le detectó un quiste ovárico que requiere cirugía inmediata. * Oramos para que Dios agilice el proceso en la clínica, que el quiste sea benigno.","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"},{"id":"carlos-1","name":"Carlos Martínez","description":"*Se encuentra internado recibiendo quimioterapias. * Oramos por un milagro de sanidad y un encuentro personal con Dios.","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"},{"id":"irene-1","name":"Irene Aracely Oliver","description":"Los doctores creen que el cancer se ha pasado a los pulmones. * Oramos por un milagro de sanidad en su cuerpo.","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"},{"id":"dolores-1","name":"Dolores Alanis Torres","description":"* El cáncer diagnosticado ha hecho metástasis. * Oramos por fortaleza en su vida y por un milagro de sanidad sobre su cuerpo.","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"},{"id":"jose-1","name":"José Ventura Elías Venegas","description":"* Diagnosticado con melanoma maligno y un ganglio afectado; tiene cirugía programada para junio. * Oramos por su sanidad, por la eficacia del tratamiento.","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"},{"id":"silviano-1","name":"Silviano Flores","description":"* Presenta inflamación cerebral por deshidratación, lo que le provoca delirios. * Oremos para que los medicamentos sean efectivos.","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"},{"id":"inocencio-1","name":"Inocencio Flores","description":"* Se encuentra grave tras una cirugía de corazón abierto. Los doctores han retirado los sedantes; oramos para que su cerebro reaccione favorablemente.","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"},{"id":"pastor-1","name":"Pastor Alejandro Escobedo","description":"* Oramos por un milagro de restauración en su ojo, que recupere la vista y que toda su función interna sea restablecida.","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"},{"id":"mariana-1","name":"Mariana Reyes","description":"Infeccion grave de estomago. Oramos por una intervención de parte de Dios sobre su cuerpo. Bendecimos su vida!","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"},{"id":"raquel-1","name":"Raquel Moraga","description":"Salio bien de su reciente cirugia. Oremos que sea fortalecida y para que su recuperación no tenga ninguna secuela.","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"},{"id":"gabriela-1","name":"Gabriela Pantoja","description":"Se someterá a una electromiografía de tres días a partir del 15 de junio. Pedimos por el éxito y precisión del estudio.","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"},{"id":"maria-1","name":"María Reyes","description":"Tienes gastroenteritis infecciosa. Oramos por sanidad, que cese la infección y el hipo persistente. Oramos por paz.","status":"Activa","updates":[],"createdAt":"2026-05-13","updatedAt":"2026-05-18"}];
+    let allPetitions = [];
     let currentFilter = 'all';
     let currentEditId = null;
     let currentUpdateId = null;
@@ -698,7 +697,14 @@
         return;
       }
 
-      const html = '<div class="petitions-grid">' + petitions.map(p => {
+      // Ordenar peticiones por fecha más reciente primero
+      const sortedPetitions = [...petitions].sort((a, b) => {
+        const dateA = new Date(a.updatedAt || a.createdAt || '2000-01-01');
+        const dateB = new Date(b.updatedAt || b.createdAt || '2000-01-01');
+        return dateB - dateA; // Más reciente primero
+      });
+
+      const html = '<div class="petitions-grid">' + sortedPetitions.map(p => {
         const isRecent = isRecentlyUpdated(p);
         const lastUpdate = getLastUpdate(p);
         return `
