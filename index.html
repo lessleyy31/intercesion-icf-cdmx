@@ -623,6 +623,9 @@
     let currentDeleteId = null;
     let selectedForList = new Set();
     let createdLists = [];
+    let syncInterval = null;
+    let lastSyncTime = 0;
+    const SYNC_INTERVAL = 3000; // Sincronizar cada 3 segundos
 
     // Datos de peticiones embebidos para GitHub Pages
     const defaultPetitions = [
@@ -1286,6 +1289,90 @@
       filterPetitions(e.target.value);
     });
 
+    // Función para sincronizar cambios con el servidor
+    async function syncWithServer() {
+      try {
+        const response = await fetch('/api/trpc/petitions.list');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        const serverPetitions = data.result?.data?.json || [];
+        
+        // Comparar y detectar cambios
+        if (JSON.stringify(serverPetitions) !== JSON.stringify(allPetitions)) {
+          const newPetitions = serverPetitions.filter(sp => !allPetitions.find(ap => ap.id === sp.id));
+          const deletedPetitions = allPetitions.filter(ap => !serverPetitions.find(sp => sp.id === ap.id));
+          const modifiedPetitions = serverPetitions.filter(sp => {
+            const local = allPetitions.find(ap => ap.id === sp.id);
+            return local && JSON.stringify(local) !== JSON.stringify(sp);
+          });
+          
+          // Actualizar datos locales
+          allPetitions = serverPetitions;
+          savePetitionsToStorage();
+          renderPetitions(allPetitions);
+          
+          // Mostrar notificaciones
+          if (newPetitions.length > 0) {
+            showNotification(`✨ ${newPetitions.length} nueva${newPetitions.length > 1 ? 's' : ''} peticion${newPetitions.length > 1 ? 'es' : ''}`);
+          }
+          if (modifiedPetitions.length > 0) {
+            showNotification(`📝 ${modifiedPetitions.length} peticion${modifiedPetitions.length > 1 ? 'es' : ''} actualizada${modifiedPetitions.length > 1 ? 's' : ''}`);
+          }
+          if (deletedPetitions.length > 0) {
+            showNotification(`🗑️ ${deletedPetitions.length} peticion${deletedPetitions.length > 1 ? 'es' : ''} eliminada${deletedPetitions.length > 1 ? 's' : ''}`);
+          }
+        }
+      } catch (error) {
+        console.log('Sincronizacion con servidor no disponible');
+      }
+    }
+    
+    // Función para mostrar notificaciones
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: white; padding: 16px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); z-index: 10000; animation: slideIn 0.3s ease; border-left: 4px solid #0369a1; font-size: 14px; max-width: 300px;';
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      // Reproducir sonido de notificacion
+      playNotificationSound();
+      
+      // Remover despues de 4 segundos
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 4000);
+    }
+    
+    // Función para reproducir sonido de notificacion
+    function playNotificationSound() {
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 800;
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.5);
+      } catch (e) {
+        // Ignorar si el navegador no soporta Web Audio API
+      }
+    }
+    
+    // Agregar estilos de animacion
+    const style = document.createElement('style');
+    style.textContent = '@keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } } @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }';
+    document.head.appendChild(style);
+
     document.addEventListener('DOMContentLoaded', () => {
       loadListsFromStorage();
       // Primero intenta cargar del localStorage
@@ -1293,9 +1380,15 @@
         // Si no hay en localStorage, carga de la API
         loadPetitions();
       }
+      
+      // Iniciar sincronizacion automatica cada 3 segundos
+      syncInterval = setInterval(syncWithServer, SYNC_INTERVAL);
     });
-    // No recargar cada 30 segundos para no perder cambios locales
-    // setInterval(loadPetitions, 30000);
+    
+    // Limpiar intervalo cuando se cierre la pagina
+    window.addEventListener('beforeunload', () => {
+      if (syncInterval) clearInterval(syncInterval);
+    });
   </script>
 </body>
 </html>
