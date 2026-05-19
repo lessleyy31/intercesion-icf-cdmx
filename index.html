@@ -555,9 +555,9 @@
       <div style="margin-bottom: 16px;">
         <label for="editStatus" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Estado:</label>
         <select id="editStatus" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; cursor: pointer;">
-          <option value="Activa">Activa</option>
-          <option value="Completada">Completada</option>
-          <option value="Archivada">Archivada</option>
+          <option value="active">Activa</option>
+          <option value="completed">Completada</option>
+          <option value="archived">Archivada</option>
         </select>
       </div>
       <div class="modal-buttons">
@@ -1099,7 +1099,7 @@
       if (petition) {
         document.getElementById('editName').value = petition.name;
         document.getElementById('editDescription').value = petition.description;
-        document.getElementById('editStatus').value = petition.status || 'Activa';
+        document.getElementById('editStatus').value = petition.status || 'active';
         document.getElementById('editModal').classList.add('active');
       }
     }
@@ -1110,8 +1110,9 @@
         petition.name = document.getElementById('editName').value;
         petition.description = document.getElementById('editDescription').value;
         petition.status = document.getElementById('editStatus').value;
-        petition.updatedAt = new Date();
-        renderPetitions(allPetitions);
+        petition.updatedAt = new Date().toISOString().split('T')[0];
+        savePetitions();
+        filterPetitions(document.getElementById('searchInput').value);
         closeModal('editModal');
       }
     }
@@ -1403,6 +1404,25 @@
     style.textContent = '@keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } } @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } } .notification-dot { display: inline-block; width: 12px; height: 12px; background: #10b981; border-radius: 50%; margin-right: 8px; }';
     document.head.appendChild(style);
 
+        // Función para verificar y mostrar recordatorio diario
+    function checkDailyReminder() {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      
+      // Verificar si es 7:50 PM (19:50)
+      if (hours === 19 && minutes === 50) {
+        const lastReminder = localStorage.getItem('lastReminderDate');
+        const today = new Date().toISOString().split('T')[0];
+        
+        // Solo mostrar una vez por día
+        if (lastReminder !== today) {
+          showNotification('Es momento de enviar la lista de oración 🔥');
+          localStorage.setItem('lastReminderDate', today);
+        }
+      }
+    }
+    
     document.addEventListener('DOMContentLoaded', () => {
       loadListsFromStorage();
       // Primero intenta cargar del localStorage
@@ -1410,9 +1430,11 @@
         // Si no hay en localStorage, carga de la API
         loadPetitions();
       }
-      
       // Iniciar sincronizacion automatica cada 3 segundos
       syncInterval = setInterval(syncWithServer, SYNC_INTERVAL);
+      
+      // Verificar recordatorio cada minuto
+      setInterval(checkDailyReminder, 60000);
     });
     
     // Limpiar intervalo cuando se cierre la pagina
