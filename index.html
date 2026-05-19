@@ -552,6 +552,14 @@
       <h2>Editar Petición</h2>
       <input type="text" id="editName" placeholder="Nombre de la petición">
       <textarea id="editDescription" placeholder="Descripción" rows="4"></textarea>
+      <div style="margin-bottom: 16px;">
+        <label for="editStatus" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Estado:</label>
+        <select id="editStatus" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; cursor: pointer;">
+          <option value="Activa">Activa</option>
+          <option value="Completada">Completada</option>
+          <option value="Archivada">Archivada</option>
+        </select>
+      </div>
       <div class="modal-buttons">
         <button class="btn-primary" onclick="saveEdit()">Guardar</button>
         <button class="btn-secondary" onclick="closeModal('editModal')">Cancelar</button>
@@ -1091,6 +1099,7 @@
       if (petition) {
         document.getElementById('editName').value = petition.name;
         document.getElementById('editDescription').value = petition.description;
+        document.getElementById('editStatus').value = petition.status || 'Activa';
         document.getElementById('editModal').classList.add('active');
       }
     }
@@ -1100,6 +1109,7 @@
       if (petition) {
         petition.name = document.getElementById('editName').value;
         petition.description = document.getElementById('editDescription').value;
+        petition.status = document.getElementById('editStatus').value;
         petition.updatedAt = new Date();
         renderPetitions(allPetitions);
         closeModal('editModal');
