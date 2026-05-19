@@ -1413,7 +1413,7 @@
       const minutes = now.getMinutes();
       
       // Verificar si es 7:50 PM (19:50)
-      if (hours === 19 && minutes === 50) {
+      if (hours === 19 && minutes === 0) {
         const lastReminder = localStorage.getItem('lastReminderDate');
         const today = new Date().toISOString().split('T')[0];
         
