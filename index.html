@@ -755,11 +755,12 @@
         const lastUpdate = getLastUpdate(p);
         const createdDate = p.createdAt ? new Date(p.createdAt).toLocaleDateString('es-MX', {year: 'numeric', month: 'short', day: 'numeric'}) : 'Desconocida';
         const updatedDate = p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('es-MX', {year: 'numeric', month: 'short', day: 'numeric'}) : createdDate;
+        const indicatorColor = getIndicatorColor(p);
         return `
           <div class="petition-card ${isRecent ? 'recent' : ''}" onclick="openDetailModal('${p.id}')" style="cursor: pointer;">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <span style="display: inline-block; width: 12px; height: 12px; background: ${indicatorColor}; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 4px rgba(0,0,0,0.2);"></span>
               <h3 style="margin: 0; flex: 1;">${escapeHtml(p.name)}</h3>
-              ${isRecent ? '<span style="display: inline-block; width: 10px; height: 10px; background: #10b981; border-radius: 50%; flex-shrink: 0;"></span>' : ''}
             </div>
             <p>${escapeHtml(lastUpdate || p.description)}</p>
             <div style="font-size: 12px; color: #999; margin-bottom: 8px;">
@@ -1029,6 +1030,21 @@
       const now = new Date();
       const hours = (now - lastUpdate) / (1000 * 60 * 60);
       return hours < 24;
+    }
+
+    function getIndicatorColor(p) {
+      // Amarillo si está en proceso
+      if (p.status === 'in-process') return '#fbbf24';
+      
+      // Verde si fue actualizada en los últimos 7 días
+      const lastUpdateDate = p.updatedAt ? new Date(p.updatedAt) : (p.createdAt ? new Date(p.createdAt) : null);
+      if (lastUpdateDate) {
+        const now = new Date();
+        const days = (now - lastUpdateDate) / (1000 * 60 * 60 * 24);
+        if (days <= 7) return '#10b981'; // Verde
+        if (days > 7) return '#ef4444'; // Rojo
+      }
+      return '#10b981'; // Verde por defecto
     }
 
     function getLastUpdate(p) {
