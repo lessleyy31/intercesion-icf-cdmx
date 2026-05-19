@@ -753,10 +753,18 @@
       const html = '<div class="petitions-grid">' + sortedPetitions.map(p => {
         const isRecent = isRecentlyUpdated(p);
         const lastUpdate = getLastUpdate(p);
+        const createdDate = p.createdAt ? new Date(p.createdAt).toLocaleDateString('es-MX', {year: 'numeric', month: 'short', day: 'numeric'}) : 'Desconocida';
+        const updatedDate = p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('es-MX', {year: 'numeric', month: 'short', day: 'numeric'}) : createdDate;
         return `
           <div class="petition-card ${isRecent ? 'recent' : ''}" onclick="openDetailModal('${p.id}')" style="cursor: pointer;">
-            <h3>${escapeHtml(p.name)}</h3>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <h3 style="margin: 0; flex: 1;">${escapeHtml(p.name)}</h3>
+              ${isRecent ? '<span style="display: inline-block; width: 10px; height: 10px; background: #10b981; border-radius: 50%; flex-shrink: 0;"></span>' : ''}
+            </div>
             <p>${escapeHtml(lastUpdate || p.description)}</p>
+            <div style="font-size: 12px; color: #999; margin-bottom: 8px;">
+              <span>Agregada: ${createdDate}</span> • <span>Actualizada: ${updatedDate}</span>
+            </div>
             <div class="petition-meta">
               <span class="status-badge status-${p.status}">${getStatusLabel(p.status)}</span>
               <span class="updates-count">${(p.history?.length || 0)} act.</span>
